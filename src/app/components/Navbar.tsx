@@ -12,8 +12,8 @@ const Navbar = () => {
           <Image
             src="/logos/gekiilogo.jpg"
             alt="Genkii Films Logo"
-            width={60}
-            height={60}
+            width={90}
+            height={90}
             style={{ objectFit: 'contain' }}
             className="logo-image"
           />
