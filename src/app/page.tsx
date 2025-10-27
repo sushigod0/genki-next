@@ -21,17 +21,22 @@ export default function Home() {
 
     const initializeLocomotiveScroll = async () => {
       try {
-        // Dynamically import locomotive-scroll to avoid SSR issues
-        const LocomotiveScroll = (await import('locomotive-scroll')).default;
+        // Only initialize on desktop/tablet, not on mobile
+        const isMobile = window.innerWidth <= 768;
         
-        if (containerRef.current) {
-          locoScroll = new LocomotiveScroll({
-            el: containerRef.current,
-            smooth: true,
-            smoothMobile: false,
-          });
+        if (!isMobile) {
+          // Dynamically import locomotive-scroll to avoid SSR issues
+          const LocomotiveScroll = (await import('locomotive-scroll')).default;
           
-          locoScrollRef.current = locoScroll;
+          if (containerRef.current) {
+            locoScroll = new LocomotiveScroll({
+              el: containerRef.current,
+              smooth: true,
+              smoothMobile: false,
+            });
+            
+            locoScrollRef.current = locoScroll;
+          }
         }
       } catch (error) {
         console.warn('Locomotive Scroll failed to initialize:', error);
@@ -115,6 +120,7 @@ export default function Home() {
               fill
               style={{ objectFit: 'cover', objectPosition: 'center' }}
               priority
+              sizes="(max-width: 768px) 100vw, 50vw"
             />
           </div>
         </section>

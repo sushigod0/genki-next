@@ -720,3 +720,40 @@ html.has-scroll-dragging {
 .nav-logo:hover .logo-image {
   animation: orangeGlow 2s ease-in-out infinite;
 }
+
+/* Critical mobile image fixes for iPhone */
+@media (max-width: 768px) {
+  /* Ensure hero image is visible on mobile */
+  .sec-1 .mask {
+    position: relative !important;
+    z-index: 1;
+    background: #f0f0f0; /* Fallback background */
+  }
+  
+  .sec-1 .mask img {
+    position: relative !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    display: block !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  
+  /* Disable locomotive scroll effects on mobile that might hide content */
+  [data-scroll] {
+    transform: none !important;
+    opacity: 1 !important;
+  }
+  
+  /* Force visibility of critical elements on mobile */
+  .sec-1 .lines h1 {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  
+  .sec-1 .mask[data-scroll] {
+    transform: none !important;
+    opacity: 1 !important;
+  }
+}
