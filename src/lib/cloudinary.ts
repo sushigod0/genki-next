@@ -45,7 +45,6 @@ export async function getCloudinaryImages(folder: string = 'genki'): Promise<Clo
     
     return resources;
   } catch (error) {
-    console.error('Error fetching Cloudinary images:', error);
     return [];
   }
 }
@@ -98,7 +97,6 @@ export function buildCloudinaryUrl(
     const url = `https://res.cloudinary.com/${cloudName}/image/upload/${transformationString}/${cleanPublicId}`;
     return url;
   } catch (error) {
-    console.warn('Error building Cloudinary URL:', error);
     return '';
   }
 }
@@ -146,7 +144,6 @@ export async function getCloudinaryImagesWithCredentials(): Promise<CloudinaryRe
     const data = await response.json();
     return data.resources || [];
   } catch (error) {
-    console.error('Error fetching Cloudinary images with credentials:', error);
     return [];
   }
 }

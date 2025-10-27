@@ -21,9 +21,7 @@ export default function Home() {
     if (locoScrollRef.current) {
       try {
         locoScrollRef.current.update();
-        console.log('Locomotive Scroll updated');
       } catch (error) {
-        console.warn('Error updating Locomotive Scroll:', error);
       }
     }
   }, []);
@@ -58,11 +56,9 @@ export default function Home() {
               // You can add scroll position tracking here if needed
             });
 
-            console.log('Locomotive Scroll initialized');
           }
         }
       } catch (error) {
-        console.warn('Locomotive Scroll failed to initialize:', error);
       }
     };
 
@@ -120,9 +116,7 @@ export default function Home() {
       if (locoScroll) {
         try {
           locoScroll.destroy();
-          console.log('Locomotive Scroll destroyed');
         } catch (error) {
-          console.warn('Error destroying Locomotive Scroll:', error);
         }
       }
     };

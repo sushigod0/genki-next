@@ -188,13 +188,12 @@ const Gallery = ({ onContentLoad }: GalleryProps) => {
   const handleImageLoad = useCallback(() => {
     setImagesLoaded(prev => {
       const newCount = prev + 1;
-      console.log(`Image loaded: ${newCount}/${totalImagesToLoad.current}`);
       
       // Update locomotive scroll when all images are loaded
       if (newCount === totalImagesToLoad.current && onContentLoad) {
         setTimeout(() => {
           onContentLoad();
-          console.log('All images loaded, locomotive scroll updated');
+          // console.log('All images loaded, locomotive scroll updated');
         }, 200);
       }
       
@@ -208,12 +207,11 @@ const Gallery = ({ onContentLoad }: GalleryProps) => {
         setLoading(true);
         setError(null);
 
-        console.log('Fetching images for Unsplash-style layout...');
 
         let response = await fetch('/api/cloudinary/genki');
         
         if (!response.ok) {
-          console.warn('Genki API failed, trying resources API...');
+          // console.warn('Genki API failed, trying resources API...');
           response = await fetch('/api/cloudinary/resources?folder=genki&max_results=500');
         }
         
@@ -222,7 +220,6 @@ const Gallery = ({ onContentLoad }: GalleryProps) => {
         }
 
         const data = await response.json();
-        console.log('API Response:', data);
         
         if (data.resources && data.resources.length > 0) {
           const processedImages = data.resources.map((image: any) => ({
@@ -236,14 +233,11 @@ const Gallery = ({ onContentLoad }: GalleryProps) => {
             [processedImages[i], processedImages[j]] = [processedImages[j], processedImages[i]];
           }
           
-          console.log(`Processed ${processedImages.length} images for Unsplash layout`);
           setGalleryImages(processedImages);
         } else {
-          console.warn('No Cloudinary images found');
-          setError('No images found in your Cloudinary genki folder');
+          setError('No images found');
         }
       } catch (error) {
-        console.error('Error fetching Cloudinary images:', error);
         setError('Failed to load images from Cloudinary');
       } finally {
         setLoading(false);
@@ -274,7 +268,6 @@ const Gallery = ({ onContentLoad }: GalleryProps) => {
           format: 'auto'
         }) || fallbackUrl;
       } catch (error) {
-        console.warn('Error building Cloudinary URL for:', item.public_id, error);
         return fallbackUrl;
       }
     }
@@ -304,7 +297,7 @@ const Gallery = ({ onContentLoad }: GalleryProps) => {
           <div className="gallery-header">
             <h2 data-scroll data-scroll-speed="1">VISUAL STORIES</h2>
             <p data-scroll data-scroll-speed="0.5">
-              Loading our visual stories...
+              Loading visual stories...
             </p>
           </div>
           <div className="unsplash-gallery-loading">
@@ -333,7 +326,7 @@ const Gallery = ({ onContentLoad }: GalleryProps) => {
               {error || 'No images available'}
             </p>
             <p className="error-details">
-              Please check your Cloudinary configuration and ensure images are uploaded to the 'genki' folder.
+              this is unusual, contact dev asap, SUSHIIIIIII
             </p>
           </div>
         </div>
@@ -388,7 +381,6 @@ const Gallery = ({ onContentLoad }: GalleryProps) => {
                       blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWEREiMxUf/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
                       onLoad={handleImageLoad}
                       onError={() => {
-                        console.warn(`Failed to load image: ${item.public_id}`);
                         handleImageLoad(); // Still count it as "loaded" to avoid blocking
                       }}
                     />

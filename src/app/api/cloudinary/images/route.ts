@@ -15,9 +15,6 @@ export async function GET(request: NextRequest) {
     const folder = searchParams.get('folder') || 'genki';
     const maxResults = parseInt(searchParams.get('max_results') || '30');
 
-    console.log('Fetching from folder:', folder);
-    console.log('Max results:', maxResults);
-
     // Search for images in the specified folder (working method from test)
     const result = await cloudinary.search
       .expression(`folder:${folder}`)
@@ -25,24 +22,15 @@ export async function GET(request: NextRequest) {
       .max_results(maxResults)
       .execute();
 
-    console.log('Cloudinary search result:', {
-      total_count: result.total_count,
-      resources_count: result.resources?.length || 0
-    });
-
     return NextResponse.json({
       resources: result.resources || [],
       total_count: result.total_count || 0,
     });
-  } catch (error) {
-    console.error('Error fetching Cloudinary images:', error);
-    
+  } catch (error) {    
     const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
     
     // Try alternative approach using resources API
-    try {
-      console.log('Trying alternative resources API...');
-      
+    try {      
       const { searchParams } = new URL(request.url); // Re-declare here
       const folder = searchParams.get('folder') || 'genki'; // Fix: Re-declare folder variable
       const maxResults = parseInt(searchParams.get('max_results') || '30');
@@ -59,18 +47,11 @@ export async function GET(request: NextRequest) {
       const genkiImages = result.resources?.filter((resource: any) => 
         resource.folder === folder
       ) || [];
-
-      console.log('Resources API result:', {
-        total_resources: result.resources?.length || 0,
-        genki_resources: genkiImages.length
-      });
-
       return NextResponse.json({
         resources: genkiImages.slice(0, maxResults),
         total_count: genkiImages.length,
       });
     } catch (fallbackError) {
-      console.error('Fallback API also failed:', fallbackError);
       
       const fallbackErrorMessage = fallbackError instanceof Error ? fallbackError.message : 'Unknown fallback error';
       

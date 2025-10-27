@@ -11,16 +11,12 @@ cloudinary.config({
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('Fetching ALL genki images with aspect ratio data...');
 
     // Get ALL images from genki folder
     const result = await cloudinary.search
       .expression('folder:genki')
       .max_results(500) // Cloudinary max limit per request
       .execute();
-
-    console.log('Raw result from Cloudinary:', result);
-    console.log(`Found ${result.resources?.length || 0} genki images`);
 
     // Transform to include proper aspect ratio calculations
     const transformedResources = (result.resources || [])
@@ -32,12 +28,6 @@ export async function GET(request: NextRequest) {
         const hasValidDimensions = resource.width && resource.height && resource.width > 0 && resource.height > 0;
         
         if (!hasValidPublicId || !hasValidUrl || !isImage || !hasValidDimensions) {
-          console.warn('Filtering out invalid resource:', {
-            public_id: resource.public_id,
-            has_url: !!hasValidUrl,
-            resource_type: resource.resource_type,
-            dimensions: `${resource.width}x${resource.height}`
-          });
           return false;
         }
         
@@ -47,9 +37,9 @@ export async function GET(request: NextRequest) {
         // Calculate aspect ratio with fallback
         const aspectRatio = resource.aspect_ratio || (resource.width / resource.height);
         
-        console.log(`Processing image: ${resource.public_id}`);
-        console.log(`  Dimensions: ${resource.width}x${resource.height}`);
-        console.log(`  Aspect Ratio: ${aspectRatio}`);
+        // console.log(`Processing image: ${resource.public_id}`);
+        // console.log(`  Dimensions: ${resource.width}x${resource.height}`);
+        // console.log(`  Aspect Ratio: ${aspectRatio}`);
         
         return {
           asset_id: resource.asset_id || resource.public_id,
@@ -78,9 +68,7 @@ export async function GET(request: NextRequest) {
       });
 
     // Log some sample aspect ratios for debugging
-    console.log('\nSample aspect ratios:');
     transformedResources.slice(0, 5).forEach((img: any, index: number) => {
-      console.log(`  ${index + 1}. ${img.public_id}: ${img.width}x${img.height} = ${img.aspect_ratio.toFixed(3)}`);
     });
 
     return NextResponse.json({
@@ -95,11 +83,8 @@ export async function GET(request: NextRequest) {
       }
     });
 
-  } catch (error) {
-    console.error('Error fetching genki images:', error);
-    
+  } catch (error) {    
     const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-    
     return NextResponse.json(
       { error: 'Failed to fetch genki images', details: errorMessage },
       { status: 500 }
