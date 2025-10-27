@@ -204,7 +204,7 @@ export default function Home() {
           </div>
 
           <div className="cta-section">
-            <h3>FOLLOW OUR JOURNEY</h3>
+            <h3>Connet With Me</h3>
             <div className="cta-socials">
               <a href="https://www.instagram.com/genkii.films" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">

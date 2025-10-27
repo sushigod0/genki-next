@@ -50,7 +50,7 @@ const Gallery = ({ onContentLoad }: GalleryProps) => {
   const [galleryRows, setGalleryRows] = useState<RowData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [displayCount, setDisplayCount] = useState(20);
+  const [displayCount, setDisplayCount] = useState(16);
   const [containerWidth, setContainerWidth] = useState(1200);
   const [imagesLoaded, setImagesLoaded] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -58,10 +58,10 @@ const Gallery = ({ onContentLoad }: GalleryProps) => {
 
   // Calculate rows with proper height and centering
   const calculateGalleryRows = useCallback((images: CloudinaryImage[], width: number): RowData[] => {
-    const TARGET_ROW_HEIGHT = 280;
-    const GAP = 8;
+    const TARGET_ROW_HEIGHT = 380;
+    const GAP = 28;
     const MIN_IMAGES_PER_ROW = 2;
-    const MAX_IMAGES_PER_ROW = 5;
+    const MAX_IMAGES_PER_ROW = 3;
     
     const rows: RowData[] = [];
     let currentRow: CloudinaryImage[] = [];
@@ -411,12 +411,6 @@ const Gallery = ({ onContentLoad }: GalleryProps) => {
           </div>
         )}
 
-        {/* Show all loaded message */}
-        {displayCount >= galleryImages.length && galleryImages.length > 20 && (
-          <div className="gallery-complete">
-            <p>All images loaded</p>
-          </div>
-        )}
       </div>
     </section>
   );
