@@ -11,63 +11,88 @@ cloudinary.config({
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('Fetching ALL genki images using working method...');
+    console.log('Fetching ALL genki images with aspect ratio data...');
 
-    // Get ALL images from genki folder (not limited to 20)
+    // Get ALL images from genki folder
     const result = await cloudinary.search
       .expression('folder:genki')
       .max_results(500) // Cloudinary max limit per request
       .execute();
 
+    console.log('Raw result from Cloudinary:', result);
     console.log(`Found ${result.resources?.length || 0} genki images`);
 
-    // Transform to match expected format with high quality URLs and filtering
+    // Transform to include proper aspect ratio calculations
     const transformedResources = (result.resources || [])
       .filter((resource: any) => {
         // Filter out resources that might be problematic
         const hasValidPublicId = resource.public_id && resource.public_id.trim().length > 0;
         const hasValidUrl = resource.secure_url || resource.url;
         const isImage = resource.resource_type === 'image';
+        const hasValidDimensions = resource.width && resource.height && resource.width > 0 && resource.height > 0;
         
-        if (!hasValidPublicId || !hasValidUrl || !isImage) {
+        if (!hasValidPublicId || !hasValidUrl || !isImage || !hasValidDimensions) {
           console.warn('Filtering out invalid resource:', {
             public_id: resource.public_id,
             has_url: !!hasValidUrl,
-            resource_type: resource.resource_type
+            resource_type: resource.resource_type,
+            dimensions: `${resource.width}x${resource.height}`
           });
           return false;
         }
         
         return true;
       })
-      .map((resource: any) => ({
-        asset_id: resource.asset_id || resource.public_id,
-        public_id: resource.public_id,
-        format: resource.format,
-        version: resource.version,
-        resource_type: resource.resource_type || 'image',
-        type: resource.type || 'upload',
-        created_at: resource.created_at,
-        bytes: resource.bytes,
-        width: resource.width,
-        height: resource.height,
-        folder: 'genki',
-        url: resource.url,
-        secure_url: resource.secure_url,
-        context: resource.context || {},
-        // Add optimized URLs for different sizes
-        optimized_urls: {
-          thumbnail: `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/w_400,h_400,c_fill,q_90,f_auto/${resource.public_id}`,
-          medium: `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/w_800,h_600,c_fill,q_90,f_auto/${resource.public_id}`,
-          large: `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/w_1200,h_900,c_fill,q_95,f_auto/${resource.public_id}`,
-          original: resource.secure_url || resource.url // Use original URL as fallback
-        }
-      }));
+      .map((resource: any) => {
+        // Calculate aspect ratio with fallback
+        const aspectRatio = resource.aspect_ratio || (resource.width / resource.height);
+        
+        console.log(`Processing image: ${resource.public_id}`);
+        console.log(`  Dimensions: ${resource.width}x${resource.height}`);
+        console.log(`  Aspect Ratio: ${aspectRatio}`);
+        
+        return {
+          asset_id: resource.asset_id || resource.public_id,
+          public_id: resource.public_id,
+          format: resource.format,
+          version: resource.version,
+          resource_type: resource.resource_type || 'image',
+          type: resource.type || 'upload',
+          created_at: resource.created_at,
+          bytes: resource.bytes,
+          width: resource.width,
+          height: resource.height,
+          aspect_ratio: aspectRatio, // Ensure aspect ratio is always present
+          folder: 'genki',
+          url: resource.url,
+          secure_url: resource.secure_url,
+          context: resource.context || {},
+          // Add optimized URLs for different sizes while preserving aspect ratio
+          optimized_urls: {
+            thumbnail: `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/w_400,c_fit,q_90,f_auto/${resource.public_id}`,
+            medium: `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/w_800,c_fit,q_90,f_auto/${resource.public_id}`,
+            large: `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/w_1200,c_fit,q_95,f_auto/${resource.public_id}`,
+            original: resource.secure_url || resource.url // Use original URL as fallback
+          }
+        };
+      });
+
+    // Log some sample aspect ratios for debugging
+    console.log('\nSample aspect ratios:');
+    transformedResources.slice(0, 5).forEach((img: any, index: number) => {
+      console.log(`  ${index + 1}. ${img.public_id}: ${img.width}x${img.height} = ${img.aspect_ratio.toFixed(3)}`);
+    });
 
     return NextResponse.json({
       resources: transformedResources,
       total_count: transformedResources.length,
-      method_used: 'search_folder_genki_all'
+      method_used: 'search_folder_genki_with_aspect_ratios',
+      aspect_ratio_stats: {
+        landscape: transformedResources.filter((img: any) => img.aspect_ratio > 1.2).length,
+        square: transformedResources.filter((img: any) => img.aspect_ratio >= 0.8 && img.aspect_ratio <= 1.2).length,
+        portrait: transformedResources.filter((img: any) => img.aspect_ratio < 0.8).length,
+        panoramic: transformedResources.filter((img: any) => img.aspect_ratio > 2).length,
+      }
     });
 
   } catch (error) {

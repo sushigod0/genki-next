@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import Image from 'next/image';
-import { buildCloudinaryUrl, getResponsiveImageUrls } from '../../lib/cloudinary';
+import { buildCloudinaryUrl } from '../../lib/cloudinary';
 
 interface CloudinaryImage {
   asset_id: string;
@@ -15,6 +15,7 @@ interface CloudinaryImage {
   bytes: number;
   width: number;
   height: number;
+  aspect_ratio?: number;
   folder?: string;
   url: string;
   secure_url: string;
@@ -30,14 +31,136 @@ interface CloudinaryImage {
   };
 }
 
+interface LayoutItem extends CloudinaryImage {
+  calculatedHeight: number;
+  calculatedWidth: number;
+}
+
+interface RowData {
+  items: LayoutItem[];
+  rowHeight: number;
+}
+
 const Gallery = () => {
   const [galleryImages, setGalleryImages] = useState<CloudinaryImage[]>([]);
+  const [galleryRows, setGalleryRows] = useState<RowData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [displayCount, setDisplayCount] = useState(21); // Start with 21 images for the full Tetris pattern
+  const [displayCount, setDisplayCount] = useState(20);
+  const [containerWidth, setContainerWidth] = useState(1200);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  // Remove fallback images - we want only Cloudinary
-  const fallbackImages: CloudinaryImage[] = [];
+  // Calculate rows with proper height and centering
+  const calculateGalleryRows = useCallback((images: CloudinaryImage[], width: number): RowData[] => {
+    const TARGET_ROW_HEIGHT = 280;
+    const GAP = 8;
+    const MIN_IMAGES_PER_ROW = 2;
+    const MAX_IMAGES_PER_ROW = 5;
+    
+    const rows: RowData[] = [];
+    let currentRow: CloudinaryImage[] = [];
+    let currentRowWidth = 0;
+    
+    images.forEach((image, index) => {
+      const aspectRatio = image.aspect_ratio || (image.width / image.height);
+      const imageWidth = TARGET_ROW_HEIGHT * aspectRatio;
+      
+      const wouldExceedWidth = currentRowWidth + imageWidth + (GAP * currentRow.length) > width;
+      const hasMinImages = currentRow.length >= MIN_IMAGES_PER_ROW;
+      const hasMaxImages = currentRow.length >= MAX_IMAGES_PER_ROW;
+      
+      if ((wouldExceedWidth && hasMinImages) || hasMaxImages) {
+        // Process current row
+        if (currentRow.length > 0) {
+          const totalAspectRatio = currentRow.reduce((sum, img) => {
+            const ratio = img.aspect_ratio || (img.width / img.height);
+            return sum + ratio;
+          }, 0);
+          
+          const rowHeight = Math.min(
+            (width - (GAP * (currentRow.length - 1))) / totalAspectRatio,
+            TARGET_ROW_HEIGHT * 1.3
+          );
+          
+          const rowItems: LayoutItem[] = currentRow.map((img) => {
+            const imgAspectRatio = img.aspect_ratio || (img.width / img.height);
+            const imgWidth = rowHeight * imgAspectRatio;
+            
+            return {
+              ...img,
+              calculatedHeight: Math.round(Math.max(rowHeight, 200)),
+              calculatedWidth: Math.round(imgWidth)
+            };
+          });
+          
+          rows.push({
+            items: rowItems,
+            rowHeight: Math.round(Math.max(rowHeight, 200))
+          });
+        }
+        
+        currentRow = [image];
+        currentRowWidth = imageWidth;
+      } else {
+        currentRow.push(image);
+        currentRowWidth += imageWidth;
+      }
+      
+      // Handle last row
+      if (index === images.length - 1 && currentRow.length > 0) {
+        const totalAspectRatio = currentRow.reduce((sum, img) => {
+          const ratio = img.aspect_ratio || (img.width / img.height);
+          return sum + ratio;
+        }, 0);
+        
+        const rowHeight = Math.min(
+          (width - (GAP * (currentRow.length - 1))) / totalAspectRatio,
+          TARGET_ROW_HEIGHT
+        );
+        
+        const rowItems: LayoutItem[] = currentRow.map((img) => {
+          const imgAspectRatio = img.aspect_ratio || (img.width / img.height);
+          const imgWidth = rowHeight * imgAspectRatio;
+          
+          return {
+            ...img,
+            calculatedHeight: Math.round(Math.max(rowHeight, 200)),
+            calculatedWidth: Math.round(imgWidth)
+          };
+        });
+        
+        rows.push({
+          items: rowItems,
+          rowHeight: Math.round(Math.max(rowHeight, 200))
+        });
+      }
+    });
+    
+    return rows;
+  }, []);
+
+  // Handle container resize
+  useEffect(() => {
+    const handleResize = () => {
+      if (containerRef.current) {
+        const newWidth = containerRef.current.offsetWidth;
+        setContainerWidth(newWidth);
+      }
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Recalculate layout when container width or images change
+  useEffect(() => {
+    if (galleryImages.length > 0 && containerWidth > 0) {
+      const visibleImages = galleryImages.slice(0, displayCount);
+      const newRows = calculateGalleryRows(visibleImages, containerWidth);
+      setGalleryRows(newRows);
+    }
+  }, [galleryImages, containerWidth, displayCount, calculateGalleryRows]);
 
   useEffect(() => {
     const fetchCloudinaryImages = async () => {
@@ -45,12 +168,10 @@ const Gallery = () => {
         setLoading(true);
         setError(null);
 
-        console.log('Fetching ALL images from Cloudinary...');
+        console.log('Fetching images for Unsplash-style layout...');
 
-        // Try the simple working API first (loads all images)
         let response = await fetch('/api/cloudinary/genki');
         
-        // If that fails, try the resources API
         if (!response.ok) {
           console.warn('Genki API failed, trying resources API...');
           response = await fetch('/api/cloudinary/resources?folder=genki&max_results=500');
@@ -64,12 +185,19 @@ const Gallery = () => {
         console.log('API Response:', data);
         
         if (data.resources && data.resources.length > 0) {
-          console.log(`Found ${data.resources.length} Cloudinary images using method: ${data.method_used}`);
-          setGalleryImages(data.resources);
-          // If we have fewer than 21 images, show all available
-          if (data.resources.length < 21) {
-            setDisplayCount(data.resources.length);
+          const processedImages = data.resources.map((image: any) => ({
+            ...image,
+            aspect_ratio: image.aspect_ratio || (image.width / image.height)
+          }));
+
+          // Shuffle for variety
+          for (let i = processedImages.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [processedImages[i], processedImages[j]] = [processedImages[j], processedImages[i]];
           }
+          
+          console.log(`Processed ${processedImages.length} images for Unsplash layout`);
+          setGalleryImages(processedImages);
         } else {
           console.warn('No Cloudinary images found');
           setError('No images found in your Cloudinary genki folder');
@@ -85,43 +213,24 @@ const Gallery = () => {
     fetchCloudinaryImages();
   }, []);
 
-  const getOptimizedImageUrl = (image: CloudinaryImage, index: number) => {
-    // First, try to use the original secure_url as a fallback
-    const fallbackUrl = image.secure_url || image.url;
+  const getOptimizedImageUrl = (item: LayoutItem) => {
+    const fallbackUrl = item.secure_url || item.url;
     
-    // Use pre-built optimized URLs if available
-    if (image.optimized_urls) {
-      // For tall images (spanning 2 rows), use large size
-      if (index % 7 === 0 || index % 7 === 2) { // Images 1, 3, 8, 10, etc.
-        return image.optimized_urls.large || fallbackUrl;
-      }
-      return image.optimized_urls.medium || fallbackUrl;
+    if (item.optimized_urls) {
+      return item.optimized_urls.large || fallbackUrl;
     }
 
-    // Fallback to building URL manually with proper sizing
-    if (image.public_id && !image.url.includes('pexels.com')) {
+    if (item.public_id && !item.url.includes('pexels.com')) {
       try {
-        // For tall spanning images, use larger dimensions
-        if (index % 7 === 0 || index % 7 === 2) {
-          return buildCloudinaryUrl(image.public_id, {
-            width: 600,
-            height: 800,
-            crop: 'fill',
-            quality: 95,
-            format: 'auto'
-          }) || fallbackUrl;
-        }
-        
-        // For regular images
-        return buildCloudinaryUrl(image.public_id, {
-          width: 500,
-          height: 400,
+        return buildCloudinaryUrl(item.public_id, {
+          width: Math.round(item.calculatedWidth * 1.5),
+          height: Math.round(item.calculatedHeight * 1.5),
           crop: 'fill',
-          quality: 95,
+          quality: 90,
           format: 'auto'
         }) || fallbackUrl;
       } catch (error) {
-        console.warn('Error building Cloudinary URL for:', image.public_id, error);
+        console.warn('Error building Cloudinary URL for:', item.public_id, error);
         return fallbackUrl;
       }
     }
@@ -136,7 +245,7 @@ const Gallery = () => {
   };
 
   const handleLoadMore = () => {
-    setDisplayCount(prev => Math.min(prev + 21, galleryImages.length)); // Load 21 more at a time
+    setDisplayCount(prev => Math.min(prev + 20, galleryImages.length));
   };
 
   if (loading) {
@@ -144,19 +253,21 @@ const Gallery = () => {
       <section data-scroll-section className="gallery-section" id="gallery">
         <div className="gallery-container">
           <div className="gallery-header">
-            <h2 data-scroll data-scroll-speed="1">OUR VISUAL STORIES</h2>
+            <h2 data-scroll data-scroll-speed="1">VISUAL STORIES</h2>
             <p data-scroll data-scroll-speed="0.5">
-              Loading our latest visual stories...
+              Loading our visual stories...
             </p>
           </div>
-          <div className="gallery-grid">
-            {Array.from({ length: 21 }).map((_, index) => (
-              <div key={index} className="gallery-item loading">
-                <div className="gallery-image-wrapper">
-                  <div className="loading-placeholder"></div>
-                </div>
-              </div>
-            ))}
+          <div className="unsplash-gallery-loading">
+            <div className="loading-row">
+              <div className="loading-item" style={{ width: '30%', height: '250px' }}></div>
+              <div className="loading-item" style={{ width: '45%', height: '250px' }}></div>
+              <div className="loading-item" style={{ width: '23%', height: '250px' }}></div>
+            </div>
+            <div className="loading-row">
+              <div className="loading-item" style={{ width: '60%', height: '200px' }}></div>
+              <div className="loading-item" style={{ width: '38%', height: '200px' }}></div>
+            </div>
           </div>
         </div>
       </section>
@@ -168,7 +279,7 @@ const Gallery = () => {
       <section data-scroll-section className="gallery-section" id="gallery">
         <div className="gallery-container">
           <div className="gallery-header">
-            <h2 data-scroll data-scroll-speed="1">OUR VISUAL STORIES</h2>
+            <h2 data-scroll data-scroll-speed="1">VISUAL STORIES</h2>
             <p data-scroll data-scroll-speed="0.5" className="error-message">
               {error || 'No images available'}
             </p>
@@ -189,52 +300,67 @@ const Gallery = () => {
           <p data-scroll data-scroll-speed="0.5">
             Capturing the essence through cinematic storytelling
           </p>
-  
         </div>
         
-        {/* Restore original Tetris-style grid layout */}
-        <div className="gallery-grid" data-scroll data-scroll-speed="0.3">
-          {galleryImages.slice(0, displayCount).map((image, index) => (
+        {/* Unsplash-style gallery with proper row structure and centering */}
+        <div 
+          ref={containerRef}
+          className="unsplash-gallery" 
+          data-scroll 
+          data-scroll-speed="0.2"
+        >
+          {galleryRows.map((row, rowIndex) => (
             <div 
-              key={image.asset_id || `image-${index}`} 
-              className="gallery-item"
-              data-scroll 
-              data-scroll-speed={Math.random() * 0.5 + 0.2} // Restore parallax effect
+              key={`row-${rowIndex}`}
+              className="gallery-row"
+              style={{ height: `${row.rowHeight}px` }}
             >
-              <div className="gallery-image-wrapper">
-                <Image
-                  src={getOptimizedImageUrl(image, index)}
-                  alt={getImageAlt(image, index)}
-                  fill
-                  style={{ objectFit: 'cover' }}
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  quality={95} // High quality
-                  priority={index < 7} // Prioritize first 7 images
-                  placeholder="blur"
-                  blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWEREiMxUf/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
-                />
-                <div className="gallery-overlay"></div>
-              </div>
+              {row.items.map((item, itemIndex) => (
+                <div 
+                  key={item.asset_id || `image-${rowIndex}-${itemIndex}`} 
+                  className="unsplash-item"
+                  style={{
+                    width: `${item.calculatedWidth}px`,
+                    height: `${item.calculatedHeight}px`,
+                  }}
+                  data-scroll 
+                  data-scroll-speed={Math.random() * 0.2 + 0.1}
+                >
+                  <div className="unsplash-image-wrapper">
+                    <Image
+                      src={getOptimizedImageUrl(item)}
+                      alt={getImageAlt(item, rowIndex * 10 + itemIndex)}
+                      fill
+                      style={{ objectFit: 'cover' }}
+                      sizes={`${item.calculatedWidth}px`}
+                      quality={90}
+                      priority={rowIndex < 2}
+                      placeholder="blur"
+                      blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWEREiMxUf/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
+                    />
+                  </div>
+                </div>
+              ))}
             </div>
           ))}
         </div>
 
-        {/* Load More Button */}
+        {/* Simple Load More Button */}
         {displayCount < galleryImages.length && (
           <div className="gallery-load-more">
             <button 
               className="load-more-btn"
               onClick={handleLoadMore}
             >
-              Load More Images ({galleryImages.length - displayCount} remaining)
+              Load More Images
             </button>
           </div>
         )}
 
         {/* Show all loaded message */}
-        {displayCount >= galleryImages.length && galleryImages.length > 21 && (
+        {displayCount >= galleryImages.length && galleryImages.length > 20 && (
           <div className="gallery-complete">
-            <p>All {galleryImages.length} images loaded</p>
+            <p>All images loaded</p>
           </div>
         )}
       </div>
