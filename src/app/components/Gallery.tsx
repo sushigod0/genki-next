@@ -206,7 +206,7 @@ const Gallery = () => {
                   src={getOptimizedImageUrl(image, index)}
                   alt={getImageAlt(image, index)}
                   fill
-                  style={{ objectFit: 'none' }}
+                  style={{ objectFit: 'cover' }}
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   quality={95} // High quality
                   priority={index < 7} // Prioritize first 7 images
