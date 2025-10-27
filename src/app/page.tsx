@@ -5,6 +5,13 @@ import Image from 'next/image';
 import Navbar from './components/Navbar';
 import Gallery from './components/Gallery';
 
+// Type declaration for locomotive-scroll
+declare global {
+  interface Window {
+    LocomotiveScroll: any;
+  }
+}
+
 export default function Home() {
   const containerRef = useRef<HTMLElement>(null);
   const locoScrollRef = useRef<any>(null);
@@ -13,46 +20,54 @@ export default function Home() {
     let locoScroll: any;
 
     const initializeLocomotiveScroll = async () => {
-      // Dynamically import locomotive-scroll to avoid SSR issues
-      const LocomotiveScroll = (await import('locomotive-scroll')).default;
-      
-      if (containerRef.current) {
-        locoScroll = new LocomotiveScroll({
-          el: containerRef.current,
-          smooth: true,
-          smoothMobile: false,
-        });
+      try {
+        // Dynamically import locomotive-scroll to avoid SSR issues
+        const LocomotiveScroll = (await import('locomotive-scroll')).default;
         
-        locoScrollRef.current = locoScroll;
+        if (containerRef.current) {
+          locoScroll = new LocomotiveScroll({
+            el: containerRef.current,
+            smooth: true,
+            smoothMobile: false,
+          });
+          
+          locoScrollRef.current = locoScroll;
+        }
+      } catch (error) {
+        console.warn('Locomotive Scroll failed to initialize:', error);
       }
     };
 
     const initializeGSAP = async () => {
-      // Dynamically import GSAP
-      const { gsap } = await import('gsap');
-      
-      const tl = gsap.timeline();
-      const maskSec1 = document.querySelector('.mask-sec-1');
-      
-      if (maskSec1) {
-        tl
-          .from(maskSec1, {
-            opacity: 0,
-            x: '-100px',
-            duration: 1.5,
-            ease: 'power3.out',
-          })
-          .from(
-            '.lines > h1',
-            {
+      try {
+        // Dynamically import GSAP
+        const { gsap } = await import('gsap');
+        
+        const tl = gsap.timeline();
+        const maskSec1 = document.querySelector('.mask-sec-1');
+        
+        if (maskSec1) {
+          tl
+            .from(maskSec1, {
               opacity: 0,
-              x: '100px',
-              stagger: 0.15,
-              duration: 1.2,
-              ease: 'power3.inOut',
-            },
-            'start-=1.45'
-          );
+              x: '-100px',
+              duration: 1.5,
+              ease: 'power3.out',
+            })
+            .from(
+              '.lines > h1',
+              {
+                opacity: 0,
+                x: '100px',
+                stagger: 0.15,
+                duration: 1.2,
+                ease: 'power3.inOut',
+              },
+              'start-=1.45'
+            );
+        }
+      } catch (error) {
+        console.warn('GSAP failed to initialize:', error);
       }
     };
 
@@ -63,14 +78,22 @@ export default function Home() {
     // Cleanup function
     return () => {
       if (locoScroll) {
-        locoScroll.destroy();
+        try {
+          locoScroll.destroy();
+        } catch (error) {
+          console.warn('Error destroying Locomotive Scroll:', error);
+        }
       }
     };
   }, []);
 
   const handleBackToTop = () => {
     if (locoScrollRef.current) {
-      locoScrollRef.current.scrollTo(0);
+      try {
+        locoScrollRef.current.scrollTo(0);
+      } catch (error) {
+        console.warn('Error scrolling to top:', error);
+      }
     }
   };
 
