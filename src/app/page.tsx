@@ -161,28 +161,6 @@ export default function Home() {
           </div>
         </section>
 
-        <section data-scroll-section className="sec-2">
-          <div className="mask video-mask">
-            <video
-              data-scroll
-              data-scroll-speed="1"
-              autoPlay
-              muted
-              loop
-              playsInline
-              style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-                objectPosition: 'center'
-              }}
-            >
-              <source src="/vids/vids.mp4" type="video/mp4" />
-              Your browser does not support the video tag.
-            </video>
-          </div>
-        </section>
-
         {/* Pass the update function to Gallery component */}
         <Gallery onContentLoad={updateLocoScroll} />
 
@@ -200,6 +178,29 @@ export default function Home() {
               and the authentic stories that emerge from urban Nepal. Our work celebrates the community, creativity, 
               and connections that define street culture in the heart of the Himalayas.
             </p>
+          </div>
+
+          {/* Video section moved here */}
+          <div className="video-section">
+            <div className="mask video-mask">
+              <video
+                data-scroll
+                data-scroll-speed="1"
+                autoPlay
+                muted
+                loop
+                playsInline
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  objectPosition: 'center'
+                }}
+              >
+                <source src="/vids/vids.mp4" type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+            </div>
           </div>
 
           <div className="cta-section">

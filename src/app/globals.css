@@ -164,7 +164,7 @@ body {
 }
 
 .sec-3 .mission-text {
-  margin-bottom: 100px;
+  margin-bottom: 80px;
   max-width: 900px;
 }
 
@@ -175,6 +175,34 @@ body {
   font-weight: 200;
   color: var(--foreground);
   font-family: 'Nexa', sans-serif;
+}
+
+/* Video section within sec-3 */
+.sec-3 .video-section {
+  margin: 80px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.sec-3 .video-section .mask,
+.sec-3 .video-section .video-mask {
+  height: 60vh;
+  width: 85%;
+  max-width: 1000px;
+  overflow: hidden;
+  position: relative;
+  border-radius: 12px;
+}
+
+.sec-3 .video-section video {
+  transition: transform 0.3s ease;
+  border-radius: 12px;
+}
+
+.sec-3 .video-section .video-mask:hover video {
+  transform: scale(1.02);
 }
 
 .sec-3 .cta-section {
@@ -637,6 +665,10 @@ html.has-scroll-dragging {
     font-size: 2rem;
     letter-spacing: 4px;
   }
+  
+  .sec-3 .video-section .video-mask {
+    height: 50vh;
+  }
 }
 
 @media (max-width: 768px) {
@@ -667,6 +699,11 @@ html.has-scroll-dragging {
   
   .unsplash-item:hover {
     transform: translateY(-1px) scale(1.01);
+  }
+  
+  .sec-3 .video-section .video-mask {
+    height: 40vh;
+    width: 95%;
   }
 }
 
@@ -754,6 +791,15 @@ html.has-scroll-dragging {
   .sec-3 .cta-section h3 {
     font-size: 1.2rem;
     letter-spacing: 3px;
+  }
+  
+  .sec-3 .video-section {
+    margin: 60px 0;
+  }
+  
+  .sec-3 .video-section .video-mask {
+    height: 35vh;
+    width: 95%;
   }
   
   .cta-socials {
