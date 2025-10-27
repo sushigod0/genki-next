@@ -1,20 +1,22 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
 export const metadata: Metadata = {
-  title: "GENKI FILMS – NEPAL | Independent Creative Studio",
-  description: "Independent creative studio focusing on storytelling through film, documentaries, and visual content. Based in Nepal, highlighting culture, lifestyle, and human stories with an authentic lens.",
+  title: "GENKII FILMS – NEPAL | Visual Storyteller",
+  description: "Genkii Films is a visual storyteller based in Kathmandu, Nepal documenting skateboarding, streets, and the culture that connects us. Capturing the raw energy of street culture in the heart of the Himalayas.",
+  keywords: "Genkii Films, Nepal, Kathmandu, skateboarding, street culture, visual storytelling, documentary, films, urban Nepal",
+  authors: [{ name: "Genkii Films" }],
+  openGraph: {
+    title: "GENKII FILMS – Visual Storyteller from Nepal",
+    description: "Documenting skateboarding, streets, and the culture that connects us in Kathmandu, Nepal.",
+    type: "website",
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "GENKII FILMS – Visual Storyteller from Nepal",
+    description: "Documenting skateboarding, streets, and the culture that connects us in Kathmandu, Nepal.",
+  },
 };
 
 export default function RootLayout({
@@ -24,9 +26,23 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <head>
+        <link
+          rel="preload"
+          href="/fonts/nexa/Nexa-ExtraLight.ttf"
+          as="font"
+          type="font/ttf"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preload"
+          href="/fonts/nexa/Nexa-Heavy.ttf"
+          as="font"
+          type="font/ttf"
+          crossOrigin="anonymous"
+        />
+      </head>
+      <body className="antialiased">
         {children}
       </body>
     </html>
