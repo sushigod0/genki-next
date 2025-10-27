@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "GENKII FILMS – NEPAL | Visual Storyteller",
+  title: "GENKII FILMS",
   description: "Genkii Films is a visual storyteller based in Kathmandu, Nepal documenting skateboarding, streets, and the culture that connects us. Capturing the raw energy of street culture in the heart of the Himalayas.",
   keywords: "Genkii Films, Nepal, Kathmandu, skateboarding, street culture, visual storytelling, documentary, films, urban Nepal",
   authors: [{ name: "Genkii Films" }],

@@ -185,13 +185,11 @@ const Gallery = () => {
     <section data-scroll-section className="gallery-section" id="gallery">
       <div className="gallery-container">
         <div className="gallery-header">
-          <h2 data-scroll data-scroll-speed="1">OUR VISUAL STORIES</h2>
+          <h2 data-scroll data-scroll-speed="1">VISUAL STORIES</h2>
           <p data-scroll data-scroll-speed="0.5">
-            Capturing the essence of Nepal through cinematic storytelling
+            Capturing the essence through cinematic storytelling
           </p>
-          <p className="gallery-count">
-            Showing {Math.min(displayCount, galleryImages.length)} of {galleryImages.length} images
-          </p>
+  
         </div>
         
         {/* Restore original Tetris-style grid layout */}
@@ -208,7 +206,7 @@ const Gallery = () => {
                   src={getOptimizedImageUrl(image, index)}
                   alt={getImageAlt(image, index)}
                   fill
-                  style={{ objectFit: 'cover' }}
+                  style={{ objectFit: 'none' }}
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   quality={95} // High quality
                   priority={index < 7} // Prioritize first 7 images

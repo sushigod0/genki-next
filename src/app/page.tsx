@@ -108,7 +108,7 @@ export default function Home() {
       <main ref={containerRef} data-scroll-container>
         <section data-scroll-section className="sec-1">
           <div className="lines">
-            <h1 data-scroll data-scroll-speed="2">GENKII</h1>
+  <h1 data-scroll data-scroll-speed="2" style={{ color: "#ff6600" }}>GENKII</h1>
             <h1 data-scroll data-scroll-speed="2">FILMS</h1>
           </div>
           <div className="mask mask-sec-1">
@@ -116,9 +116,9 @@ export default function Home() {
               data-scroll
               data-scroll-speed="-2"
               src="/img/hero.png"
-              alt="Genkii Films Hero"
+              alt="Genkii Films"
               fill
-              style={{ objectFit: 'cover', objectPosition: 'center' }}
+              style={{ objectFit: 'contain', objectPosition: 'center' }}
               priority
               sizes="(max-width: 768px) 100vw, 50vw"
             />
