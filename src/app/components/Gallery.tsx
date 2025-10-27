@@ -41,14 +41,20 @@ interface RowData {
   rowHeight: number;
 }
 
-const Gallery = () => {
+interface GalleryProps {
+  onContentLoad?: () => void;
+}
+
+const Gallery = ({ onContentLoad }: GalleryProps) => {
   const [galleryImages, setGalleryImages] = useState<CloudinaryImage[]>([]);
   const [galleryRows, setGalleryRows] = useState<RowData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [displayCount, setDisplayCount] = useState(20);
   const [containerWidth, setContainerWidth] = useState(1200);
+  const [imagesLoaded, setImagesLoaded] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
+  const totalImagesToLoad = useRef(0);
 
   // Calculate rows with proper height and centering
   const calculateGalleryRows = useCallback((images: CloudinaryImage[], width: number): RowData[] => {
@@ -159,8 +165,42 @@ const Gallery = () => {
       const visibleImages = galleryImages.slice(0, displayCount);
       const newRows = calculateGalleryRows(visibleImages, containerWidth);
       setGalleryRows(newRows);
+      
+      // Set total images to load for tracking
+      totalImagesToLoad.current = visibleImages.length;
+      setImagesLoaded(0);
     }
   }, [galleryImages, containerWidth, displayCount, calculateGalleryRows]);
+
+  // Update locomotive scroll when images are loaded
+  useEffect(() => {
+    if (imagesLoaded > 0 && onContentLoad) {
+      // Update locomotive scroll after images load with a small delay
+      const timer = setTimeout(() => {
+        onContentLoad();
+      }, 100);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [imagesLoaded, onContentLoad]);
+
+  // Handle image load completion
+  const handleImageLoad = useCallback(() => {
+    setImagesLoaded(prev => {
+      const newCount = prev + 1;
+      console.log(`Image loaded: ${newCount}/${totalImagesToLoad.current}`);
+      
+      // Update locomotive scroll when all images are loaded
+      if (newCount === totalImagesToLoad.current && onContentLoad) {
+        setTimeout(() => {
+          onContentLoad();
+          console.log('All images loaded, locomotive scroll updated');
+        }, 200);
+      }
+      
+      return newCount;
+    });
+  }, [onContentLoad]);
 
   useEffect(() => {
     const fetchCloudinaryImages = async () => {
@@ -207,11 +247,15 @@ const Gallery = () => {
         setError('Failed to load images from Cloudinary');
       } finally {
         setLoading(false);
+        // Update locomotive scroll even if there's an error
+        if (onContentLoad) {
+          setTimeout(onContentLoad, 100);
+        }
       }
     };
 
     fetchCloudinaryImages();
-  }, []);
+  }, [onContentLoad]);
 
   const getOptimizedImageUrl = (item: LayoutItem) => {
     const fallbackUrl = item.secure_url || item.url;
@@ -245,7 +289,12 @@ const Gallery = () => {
   };
 
   const handleLoadMore = () => {
-    setDisplayCount(prev => Math.min(prev + 20, galleryImages.length));
+    setDisplayCount(prev => {
+      const newCount = Math.min(prev + 20, galleryImages.length);
+      // Reset image loaded counter when loading more
+      setImagesLoaded(0);
+      return newCount;
+    });
   };
 
   if (loading) {
@@ -337,6 +386,11 @@ const Gallery = () => {
                       priority={rowIndex < 2}
                       placeholder="blur"
                       blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWEREiMxUf/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
+                      onLoad={handleImageLoad}
+                      onError={() => {
+                        console.warn(`Failed to load image: ${item.public_id}`);
+                        handleImageLoad(); // Still count it as "loaded" to avoid blocking
+                      }}
                     />
                   </div>
                 </div>

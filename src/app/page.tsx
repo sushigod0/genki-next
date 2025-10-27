@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import Navbar from './components/Navbar';
 import Gallery from './components/Gallery';
@@ -15,6 +15,18 @@ declare global {
 export default function Home() {
   const containerRef = useRef<HTMLElement>(null);
   const locoScrollRef = useRef<any>(null);
+
+  // Callback to update locomotive scroll - expose it to child components
+  const updateLocoScroll = useCallback(() => {
+    if (locoScrollRef.current) {
+      try {
+        locoScrollRef.current.update();
+        console.log('Locomotive Scroll updated');
+      } catch (error) {
+        console.warn('Error updating Locomotive Scroll:', error);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     let locoScroll: any;
@@ -33,9 +45,20 @@ export default function Home() {
               el: containerRef.current,
               smooth: true,
               smoothMobile: false,
+              multiplier: 1,
+              class: 'is-revealed',
+              scrollbarContainer: false,
+              resetNativeScroll: true,
             });
             
             locoScrollRef.current = locoScroll;
+
+            // Add event listeners for scroll updates
+            locoScroll.on('scroll', (instance: any) => {
+              // You can add scroll position tracking here if needed
+            });
+
+            console.log('Locomotive Scroll initialized');
           }
         }
       } catch (error) {
@@ -80,17 +103,30 @@ export default function Home() {
     initializeLocomotiveScroll();
     initializeGSAP();
 
+    // Update locomotive scroll when window resizes
+    const handleResize = () => {
+      if (locoScrollRef.current) {
+        setTimeout(() => {
+          updateLocoScroll();
+        }, 100);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+
     // Cleanup function
     return () => {
+      window.removeEventListener('resize', handleResize);
       if (locoScroll) {
         try {
           locoScroll.destroy();
+          console.log('Locomotive Scroll destroyed');
         } catch (error) {
           console.warn('Error destroying Locomotive Scroll:', error);
         }
       }
     };
-  }, []);
+  }, [updateLocoScroll]);
 
   const handleBackToTop = () => {
     if (locoScrollRef.current) {
@@ -108,7 +144,7 @@ export default function Home() {
       <main ref={containerRef} data-scroll-container>
         <section data-scroll-section className="sec-1">
           <div className="lines">
-  <h1 data-scroll data-scroll-speed="2" style={{ color: "#ff6600" }}>GENKII</h1>
+            <h1 data-scroll data-scroll-speed="2" style={{ color: "#ff6600" }}>GENKII</h1>
             <h1 data-scroll data-scroll-speed="2">FILMS</h1>
           </div>
           <div className="mask mask-sec-1">
@@ -147,7 +183,8 @@ export default function Home() {
           </div>
         </section>
 
-        <Gallery />
+        {/* Pass the update function to Gallery component */}
+        <Gallery onContentLoad={updateLocoScroll} />
 
         <section data-scroll-section className="sec-3">
           <div className="brand-intro">
