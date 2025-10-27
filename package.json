@@ -9,6 +9,8 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "cloudinary": "^2.8.0",
+    "dotenv": "^17.2.3",
     "gsap": "^3.13.0",
     "locomotive-scroll": "^4.1.4",
     "next": "16.0.0",
