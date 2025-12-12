@@ -104,6 +104,7 @@ export function buildCloudinaryUrl(
 /**
  * Generate responsive image URLs for different screen sizes
  */
+
 export function getResponsiveImageUrls(publicId: string) {
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
   
@@ -133,6 +134,7 @@ export function getResponsiveImageUrls(publicId: string) {
 /**
  * Alternative method using Cloudinary Admin API (requires API credentials)
  */
+
 export async function getCloudinaryImagesWithCredentials(): Promise<CloudinaryResource[]> {
   try {
     const response = await fetch('/api/cloudinary/images');
