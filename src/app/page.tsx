@@ -166,14 +166,6 @@ export default function Home() {
             </p>
           </div>
           
-          <div className="mission-text">
-            <p>
-              Through our lens, we capture the raw energy of skateboarding culture, the vibrant life of Kathmandu's streets, 
-              and the authentic stories that emerge from urban Nepal. Our work celebrates the community, creativity, 
-              and connections that define street culture in the heart of the Himalayas.
-            </p>
-          </div>
-
           {/* Video section moved here */}
           <div className="video-section">
             <div className="mask video-mask">
