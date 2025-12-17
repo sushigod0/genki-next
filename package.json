@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@vercel/analytics": "^1.6.1",
     "cloudinary": "^2.8.0",
     "dotenv": "^17.2.3",
     "gsap": "^3.13.0",
