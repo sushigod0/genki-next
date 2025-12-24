@@ -50,7 +50,6 @@ const Gallery = ({ onContentLoad }: GalleryProps) => {
   const [galleryRows, setGalleryRows] = useState<RowData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [displayCount, setDisplayCount] = useState(16);
   const [containerWidth, setContainerWidth] = useState(1200);
   const [imagesLoaded, setImagesLoaded] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -162,15 +161,14 @@ const Gallery = ({ onContentLoad }: GalleryProps) => {
   // Recalculate layout when container width or images change
   useEffect(() => {
     if (galleryImages.length > 0 && containerWidth > 0) {
-      const visibleImages = galleryImages.slice(0, displayCount);
-      const newRows = calculateGalleryRows(visibleImages, containerWidth);
+      const newRows = calculateGalleryRows(galleryImages, containerWidth);
       setGalleryRows(newRows);
 
       // Set total images to load for tracking
-      totalImagesToLoad.current = visibleImages.length;
+      totalImagesToLoad.current = galleryImages.length;
       setImagesLoaded(0);
     }
-  }, [galleryImages, containerWidth, displayCount, calculateGalleryRows]);
+  }, [galleryImages, containerWidth, calculateGalleryRows]);
 
   // Update locomotive scroll when images are loaded
   useEffect(() => {
@@ -304,25 +302,10 @@ const Gallery = ({ onContentLoad }: GalleryProps) => {
       `Genkii Films Gallery Image ${index + 1}`;
   };
 
-  const handleLoadMore = () => {
-    setDisplayCount(prev => {
-      const newCount = Math.min(prev + 20, galleryImages.length);
-      // Reset image loaded counter when loading more
-      setImagesLoaded(0);
-      return newCount;
-    });
-  };
-
   if (loading) {
     return (
       <section data-scroll-section className="gallery-section" id="gallery">
         <div className="gallery-container">
-          <div className="gallery-header">
-            <h2 data-scroll data-scroll-speed="1">VISUAL STORIES</h2>
-            <p data-scroll data-scroll-speed="0.5">
-              Loading visual stories...
-            </p>
-          </div>
           <div className="unsplash-gallery-loading">
             <div className="loading-row">
               <div className="loading-item" style={{ width: '30%', height: '250px' }}></div>
@@ -360,13 +343,6 @@ const Gallery = ({ onContentLoad }: GalleryProps) => {
   return (
     <section data-scroll-section className="gallery-section" id="gallery">
       <div className="gallery-container">
-        <div className="gallery-header">
-          <h2 data-scroll data-scroll-speed="1">VISUAL STORIES</h2>
-          <p data-scroll data-scroll-speed="0.5">
-            Capturing the essence through cinematic storytelling
-          </p>
-        </div>
-
         {/* Unsplash-style gallery with proper row structure and centering */}
         <div
           ref={containerRef}
@@ -413,18 +389,6 @@ const Gallery = ({ onContentLoad }: GalleryProps) => {
             </div>
           ))}
         </div>
-
-        {/* Simple Load More Button */}
-        {displayCount < galleryImages.length && (
-          <div className="gallery-load-more">
-            <button
-              className="load-more-btn"
-              onClick={handleLoadMore}
-            >
-              Load More Images
-            </button>
-          </div>
-        )}
 
       </div>
     </section>

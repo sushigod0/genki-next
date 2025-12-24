@@ -136,10 +136,12 @@ export default function Home() {
     <>
       <Navbar />
       <main ref={containerRef} data-scroll-container>
+        {/* Pass the update function to Gallery component */}
+        <Gallery onContentLoad={updateLocoScroll} />
+
         <section data-scroll-section className="sec-1">
           <div className="lines">
-            <h1 data-scroll data-scroll-speed="2" style={{ color: "#ff6600" }}>GENKII</h1>
-            <h1 data-scroll data-scroll-speed="2">FILMS</h1>
+            <h1 data-scroll data-scroll-speed="2">GENKII FILMS</h1>
           </div>
           <div className="mask mask-sec-1">
             <Image
@@ -154,9 +156,6 @@ export default function Home() {
             />
           </div>
         </section>
-
-        {/* Pass the update function to Gallery component */}
-        <Gallery onContentLoad={updateLocoScroll} />
 
         <section data-scroll-section className="sec-3">
           <div className="brand-intro">

@@ -67,10 +67,13 @@ body {
 .sec-1 {
   height: 85vh;
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
   padding-top: 80px;
+  padding-left: 60px;
+  padding-right: 0;
   background: var(--background);
+  gap: 100px;
 }
 
 .sec-1 .lines h1 {
@@ -79,7 +82,7 @@ body {
   font-weight: 800;
   letter-spacing: 8px;
   text-transform: uppercase;
-  color: var(--foreground);
+  color: #000000;
   line-height: 0.9;
   font-family: 'Nexa', sans-serif;
   transition: color 0.3s ease;
@@ -90,7 +93,6 @@ body {
 }
 
 .sec-1 .mask {
-  z-index: -1;
   height: 100%;
   width: 45vw;
   overflow: hidden;
@@ -409,7 +411,7 @@ html.has-scroll-dragging {
 
 /* Gallery Section */
 .gallery-section {
-  padding: 120px 40px;
+  padding: 20px 40px 120px;
   background: var(--background);
   min-height: 100vh;
   overflow: visible;
