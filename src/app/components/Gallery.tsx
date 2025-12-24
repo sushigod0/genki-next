@@ -50,10 +50,12 @@ const Gallery = ({ onContentLoad }: GalleryProps) => {
   const [galleryRows, setGalleryRows] = useState<RowData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [displayCount, setDisplayCount] = useState(12);
   const [containerWidth, setContainerWidth] = useState(1200);
   const [imagesLoaded, setImagesLoaded] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const totalImagesToLoad = useRef(0);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
 
   // Calculate rows with proper height and centering
   const calculateGalleryRows = useCallback((images: CloudinaryImage[], width: number): RowData[] => {
@@ -161,14 +163,33 @@ const Gallery = ({ onContentLoad }: GalleryProps) => {
   // Recalculate layout when container width or images change
   useEffect(() => {
     if (galleryImages.length > 0 && containerWidth > 0) {
-      const newRows = calculateGalleryRows(galleryImages, containerWidth);
+      const visibleImages = galleryImages.slice(0, displayCount);
+      const newRows = calculateGalleryRows(visibleImages, containerWidth);
       setGalleryRows(newRows);
 
       // Set total images to load for tracking
-      totalImagesToLoad.current = galleryImages.length;
+      totalImagesToLoad.current = visibleImages.length;
       setImagesLoaded(0);
     }
-  }, [galleryImages, containerWidth, calculateGalleryRows]);
+  }, [galleryImages, containerWidth, displayCount, calculateGalleryRows]);
+
+  // Intersection Observer for auto-loading more images
+  useEffect(() => {
+    if (!loadMoreRef.current) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && displayCount < galleryImages.length) {
+          setDisplayCount(prev => Math.min(prev + 12, galleryImages.length));
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    observer.observe(loadMoreRef.current);
+
+    return () => observer.disconnect();
+  }, [displayCount, galleryImages.length]);
 
   // Update locomotive scroll when images are loaded
   useEffect(() => {
@@ -374,8 +395,9 @@ const Gallery = ({ onContentLoad }: GalleryProps) => {
                       fill
                       style={{ objectFit: 'cover' }}
                       sizes={`${item.calculatedWidth}px`}
-                      quality={90}
-                      priority={rowIndex < 2}
+                      quality={75}
+                      priority={rowIndex === 0}
+                      loading={rowIndex === 0 ? 'eager' : 'lazy'}
                       placeholder="blur"
                       blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWEREiMxUf/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
                       onLoad={handleImageLoad}
@@ -389,6 +411,14 @@ const Gallery = ({ onContentLoad }: GalleryProps) => {
             </div>
           ))}
         </div>
+
+        {/* Lazy load trigger - invisible element */}
+        {displayCount < galleryImages.length && (
+          <div
+            ref={loadMoreRef}
+            style={{ height: '20px', width: '100%', margin: '40px 0' }}
+          />
+        )}
 
       </div>
     </section>
