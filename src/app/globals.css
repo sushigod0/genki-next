@@ -422,7 +422,7 @@ html.has-scroll-dragging {
 
 /* Gallery Section */
 .gallery-section {
-  padding: 64px 60px 80px;
+  padding: 70px 60px 80px;
   background: var(--background);
   min-height: 100vh;
   overflow: visible;
