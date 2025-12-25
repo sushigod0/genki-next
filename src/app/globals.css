@@ -721,104 +721,133 @@ html.has-scroll-dragging {
 }
 
 @media (max-width: 480px) {
-  .unsplash-gallery,
+  .unsplash-gallery {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
   .gallery-row {
-    gap: 3px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    height: auto !important;
   }
-  
+
   .gallery-section {
-    padding: 60px 15px;
+    padding: 90px 15px 40px;
   }
-  
+
   .gallery-header h2 {
     font-size: 1.6rem;
     letter-spacing: 2px;
   }
-  
+
+  /* Mobile: One image per row with original aspect ratios */
+  .unsplash-item {
+    width: 100% !important;
+    height: auto !important;
+  }
+
+  .unsplash-image-wrapper {
+    position: relative;
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .unsplash-image-wrapper img {
+    position: relative !important;
+    width: 100%;
+    height: auto !important;
+    object-fit: contain !important;
+  }
+
   .load-more-btn {
     padding: 12px 30px;
     font-size: 0.8rem;
   }
-  
+
   .loading-row {
     gap: 3px;
   }
-  
+
   .loading-item {
     border-radius: 4px;
   }
-  
+
   .sec-1 {
     height: 100vh;
     flex-direction: column;
     padding: 110px 20px 20px;
     gap: 30px;
   }
-  
+
   .sec-1 .lines {
     order: 2;
     text-align: center;
   }
-  
+
   .sec-1 .lines h1 {
     font-size: 2rem;
     letter-spacing: 3px;
     margin: 5px 0;
   }
-  
+
   .sec-1 .mask {
     order: 1;
     width: 90%;
     height: 60%;
     max-height: 500px;
   }
-  
+
   .sec-2 {
     height: 60vh;
     padding: 40px 20px;
   }
-  
+
   .sec-2 .mask,
   .sec-2 .video-mask {
     height: 40vh;
     width: 95%;
   }
-  
+
   .sec-3 {
-    padding: 80px 20px;
+    padding: 40px 20px;
   }
-  
+
   .sec-3 .brand-intro h2 {
     font-size: 1.6rem;
     letter-spacing: 3px;
   }
-  
+
   .sec-3 .brand-intro p {
     font-size: 1rem;
   }
-  
+
   .sec-3 .mission-text p {
     font-size: 1rem;
   }
-  
+
   .sec-3 .cta-section h3 {
     font-size: 1.2rem;
     letter-spacing: 3px;
   }
-  
+
   .sec-3 .video-section {
     margin: 60px 0;
   }
-  
+
   .sec-3 .video-section .video-mask {
     height: 35vh;
     width: 95%;
   }
-  
+
   .cta-socials {
     gap: 30px;
   }
-  
+
   .cta-socials a {
     padding: 10px;
   }
