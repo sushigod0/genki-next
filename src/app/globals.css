@@ -67,10 +67,13 @@ body {
 .sec-1 {
   height: 85vh;
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
   padding-top: 80px;
+  padding-left: 60px;
+  padding-right: 0;
   background: var(--background);
+  gap: 100px;
 }
 
 .sec-1 .lines h1 {
@@ -79,7 +82,7 @@ body {
   font-weight: 800;
   letter-spacing: 8px;
   text-transform: uppercase;
-  color: var(--foreground);
+  color: #000000;
   line-height: 0.9;
   font-family: 'Nexa', sans-serif;
   transition: color 0.3s ease;
@@ -90,7 +93,6 @@ body {
 }
 
 .sec-1 .mask {
-  z-index: -1;
   height: 100%;
   width: 45vw;
   overflow: hidden;
@@ -243,26 +245,26 @@ body {
   color: var(--orange);
 }
 
-/* Navbar Styles */
-.navbar {
+/* Minimal Navbar Styles */
+.navbar-minimal {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 1000;
   background: rgba(255, 255, 255, 0.98);
-  backdrop-filter: blur(20px);
-  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
-.nav-container {
-  max-width: 1400px;
+.nav-minimal-container {
+  max-width: 1600px;
   margin: 0 auto;
-  padding: 0 40px;
+  padding: 0 60px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 90px;
+  height: 80px;
 }
 
 .nav-logo {
@@ -276,8 +278,7 @@ body {
 }
 
 .logo-image {
-  object-fit: cover;
-  transition: all 0.3s ease;
+  object-fit: contain;
 }
 
 .nav-socials {
@@ -291,6 +292,9 @@ body {
   transition: all 0.3s ease;
   opacity: 0.6;
   padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .nav-socials a:hover {
@@ -301,18 +305,27 @@ body {
 
 /* Mobile Navbar Styles */
 @media (max-width: 768px) {
-  .nav-socials {
-    gap: 25px;
-  }
-  
-  .nav-container {
+  .nav-minimal-container {
     padding: 0 25px;
-    height: 80px;
+    height: 70px;
   }
-  
-  .logo-image {
-    width: 50px !important;
-    height: 50px !important;
+
+  .nav-logo img {
+    width: 60px !important;
+    height: 60px !important;
+  }
+
+  .nav-socials {
+    gap: 20px;
+  }
+
+  .nav-socials a {
+    padding: 6px;
+  }
+
+  .nav-socials svg {
+    width: 18px;
+    height: 18px;
   }
 }
 
@@ -409,7 +422,7 @@ html.has-scroll-dragging {
 
 /* Gallery Section */
 .gallery-section {
-  padding: 120px 40px;
+  padding: 70px 60px 80px;
   background: var(--background);
   min-height: 100vh;
   overflow: visible;
@@ -708,104 +721,133 @@ html.has-scroll-dragging {
 }
 
 @media (max-width: 480px) {
-  .unsplash-gallery,
+  .unsplash-gallery {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
   .gallery-row {
-    gap: 3px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    height: auto !important;
   }
-  
+
   .gallery-section {
-    padding: 60px 15px;
+    padding: 90px 15px 40px;
   }
-  
+
   .gallery-header h2 {
     font-size: 1.6rem;
     letter-spacing: 2px;
   }
-  
+
+  /* Mobile: One image per row with original aspect ratios */
+  .unsplash-item {
+    width: 100% !important;
+    height: auto !important;
+  }
+
+  .unsplash-image-wrapper {
+    position: relative;
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .unsplash-image-wrapper img {
+    position: relative !important;
+    width: 100%;
+    height: auto !important;
+    object-fit: contain !important;
+  }
+
   .load-more-btn {
     padding: 12px 30px;
     font-size: 0.8rem;
   }
-  
+
   .loading-row {
     gap: 3px;
   }
-  
+
   .loading-item {
     border-radius: 4px;
   }
-  
+
   .sec-1 {
     height: 100vh;
     flex-direction: column;
     padding: 110px 20px 20px;
     gap: 30px;
   }
-  
+
   .sec-1 .lines {
     order: 2;
     text-align: center;
   }
-  
+
   .sec-1 .lines h1 {
     font-size: 2rem;
     letter-spacing: 3px;
     margin: 5px 0;
   }
-  
+
   .sec-1 .mask {
     order: 1;
     width: 90%;
     height: 60%;
     max-height: 500px;
   }
-  
+
   .sec-2 {
     height: 60vh;
     padding: 40px 20px;
   }
-  
+
   .sec-2 .mask,
   .sec-2 .video-mask {
     height: 40vh;
     width: 95%;
   }
-  
+
   .sec-3 {
-    padding: 80px 20px;
+    padding: 40px 20px;
   }
-  
+
   .sec-3 .brand-intro h2 {
     font-size: 1.6rem;
     letter-spacing: 3px;
   }
-  
+
   .sec-3 .brand-intro p {
     font-size: 1rem;
   }
-  
+
   .sec-3 .mission-text p {
     font-size: 1rem;
   }
-  
+
   .sec-3 .cta-section h3 {
     font-size: 1.2rem;
     letter-spacing: 3px;
   }
-  
+
   .sec-3 .video-section {
     margin: 60px 0;
   }
-  
+
   .sec-3 .video-section .video-mask {
     height: 35vh;
     width: 95%;
   }
-  
+
   .cta-socials {
     gap: 30px;
   }
-  
+
   .cta-socials a {
     padding: 10px;
   }
@@ -868,4 +910,83 @@ html.has-scroll-dragging {
 .unsplash-item:focus-visible {
   outline: 3px solid var(--orange);
   outline-offset: 2px;
+}
+
+/* ===================================================
+   ABOUT SECTION - MINIMAL FOOTER
+   =================================================== */
+
+.about-section {
+  padding: 100px 60px 120px;
+  background: var(--background);
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.about-content {
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.about-content h2 {
+  font-size: 1.8rem;
+  font-weight: 800;
+  letter-spacing: 4px;
+  margin-bottom: 30px;
+  color: var(--foreground);
+  text-transform: uppercase;
+  font-family: 'Nexa', sans-serif;
+}
+
+.about-content p {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  font-weight: 200;
+  color: var(--muted);
+  font-family: 'Nexa', sans-serif;
+  margin-bottom: 50px;
+}
+
+.about-socials {
+  display: flex;
+  gap: 40px;
+  justify-content: center;
+  align-items: center;
+}
+
+.about-socials a {
+  color: var(--foreground);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 200;
+  letter-spacing: 1px;
+  transition: color 0.3s ease;
+  font-family: 'Nexa', sans-serif;
+  padding: 10px 0;
+  border-bottom: 2px solid transparent;
+}
+
+.about-socials a:hover {
+  color: var(--orange);
+  border-bottom-color: var(--orange);
+}
+
+@media (max-width: 768px) {
+  .about-section {
+    padding: 80px 30px 100px;
+  }
+
+  .about-content h2 {
+    font-size: 1.5rem;
+    letter-spacing: 3px;
+  }
+
+  .about-content p {
+    font-size: 1rem;
+  }
+
+  .about-socials {
+    flex-direction: column;
+    gap: 25px;
+  }
 }
